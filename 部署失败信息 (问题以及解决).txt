@@ -1,0 +1,8 @@
+getaddrinfo ENOTFOUND
+
+找不到postgreSQL的hostname
+
+解决方案: 使用Vercel的数据库
+
+
+

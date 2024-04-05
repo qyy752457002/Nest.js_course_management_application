@@ -1,0 +1,7 @@
+npm install rimraf --save-dev
+
+npm run build (webpack打包应用程序到dist目录) (每次项目内容有修改或更新，就要重新打包一次)
+
+npm run prebuild (删除dist目录)
+
+npm run start:dev 或者 npm run start:prod
