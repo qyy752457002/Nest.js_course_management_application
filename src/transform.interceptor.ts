@@ -1,38 +1,18 @@
 import {
-  NestInterceptor,
-  ExecutionContext,
-  Injectable,
-  CallHandler,
-} from '@nestjs/common'; // 这里是从 Nest.js 框架中导入所需的模块和装饰器，其中包括 NestInterceptor、ExecutionContext、Injectable 和 CallHandler。
+  NestInterceptor, // Nest 拦截器接口
+  ExecutionContext, // 执行上下文
+  Injectable, // 可注入的装饰器
+  CallHandler, // 调用处理程序
+} from '@nestjs/common'; 
+import { classToPlain } from 'class-transformer'; // 导入 class-transformer 中的 classToPlain 函数
+import { map } from 'rxjs/operators'; // 导入 rxjs 中的 map 操作符
+@Injectable() // 声明该类可注入
+export class TransformInterceptor implements NestInterceptor { // 实现 NestInterceptor 接口的 TransformInterceptor 类
+  intercept(context: ExecutionContext, next: CallHandler<any>) { // 实现拦截方法
 
-// 这里从 class-transformer 库中导入了 classToPlain 函数，它用于将类实例转换为普通 JavaScript 对象。
-import { classToPlain } from 'class-transformer';
-// 这里从 rxjs/operators 中导入了 map 操作符，它用于对 Observable 流中的每个数据项进行映射转换。
-import { map } from 'rxjs/operators';
-
-// 这是 Nest.js 中用于声明可注入的类的装饰器。在这个类中，我们声明了一个名为 TransformInterceptor 的可注入类
-@Injectable()
-// 这是定义一个名为 TransformInterceptor 的类，并且它实现了 NestInterceptor 接口。
-// NestInterceptor 接口规定了拦截器类必须要实现的方法
-export class TransformInterceptor implements NestInterceptor {
-
-  /*
-    这是 NestInterceptor 接口中定义的 intercept 方法的实现。该方法接收两个参数：
-
-    context: ExecutionContext 对象，它封装了当前请求的上下文信息。
-    next: CallHandler<any> 对象，它表示下一个处理程序，可以调用 handle() 方法来执行下一个处理程序。
-  */
-  intercept(context: ExecutionContext, next: CallHandler<any>) {
-
-    /*
-      在拦截器中，这里调用了 next.handle() 来执行下一个处理程序，
-      然后使用 pipe 方法添加了一个操作符 map。
-      
-      map 操作符会对 Observable 流中的每个数据项进行映射转换，
-      这里将数据项通过 classToPlain 函数转换为普通的 JavaScript 对象
-    */
-    return next.handle().pipe(map((data) => classToPlain(data)));
+    return next.handle().pipe( // 返回处理后的可观察流
+      map((data) => classToPlain(data)) // 映射数据并转换为普通对象
+    );
   }
-
-  // 总的来说，这个拦截器的作用是在请求处理过程中将响应数据中的类实例转换为普通的 JavaScript 对象，然后再将处理结果返回给客户端。
 }
+

@@ -1,58 +1,35 @@
 import {
-  ConflictException,
-  InternalServerErrorException,
-} from '@nestjs/common';
-import { EntityRepository, Repository } from 'typeorm';
-import { AuthCredentialsDto } from './dto/auth-credentials.dto';
-import { User } from './user.entity';
-import * as bcrypt from 'bcrypt';
+  ConflictException, // 引入冲突异常类
+  InternalServerErrorException, // 引入内部服务器错误异常类
+} from '@nestjs/common'; // 从nestjs/common模块中引入异常类
+import { EntityRepository, Repository } from 'typeorm'; // 从typeorm模块中引入实体仓库和仓库类
+import { AuthCredentialsDto } from './dto/auth-credentials.dto'; // 引入身份验证凭据数据传输对象
+import { User } from './user.entity'; // 引入用户实体类
+import * as bcrypt from 'bcrypt'; // 引入bcrypt模块用于密码哈希
 
-// 这里定义了一个名为 UsersRepository 的类，它扩展了 TypeORM 中的 Repository<User> 类，该类允许执行与数据库实体相关的各种操作。
+// 指定的实体（User）与自定义的存储库相关联，使我们能够通过存储库对象方便地执行数据库操作
 @EntityRepository(User)
-export class UsersRepository extends Repository<User> {
-  // createUser 是一个异步方法，它接受一个名为 authCredentialsDto 的参数，类型为 AuthCredentialsDto。它的目的是创建新用户。
-  async createUser(authCredentialsDto: AuthCredentialsDto): Promise<void> {
+export class UsersRepository extends Repository<User> { // 用户仓库类继承自typeorm的仓库类，并指定实体类型为User
 
-    // 这里从传入的 authCredentialsDto 中解构出 username 和 password。
-    const { username, password } = authCredentialsDto;
+  async createUser(authCredentialsDto: AuthCredentialsDto): Promise<void> { // 创建用户的异步方法，接收身份验证凭据数据传输对象，返回空值
 
-    // 使用 bcrypt 库生成密码的哈希值。
-    // 首先，调用 bcrypt.genSalt() 方法生成一个盐（salt），然后使用盐对密码进行哈希处理，得到哈希密码（hashedPassword）。
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const { username, password } = authCredentialsDto; // 从身份验证凭据DTO中提取用户名和密码
 
-    // 创建一个新的用户实例，该实例包含用户名和经过哈希处理的密码。
-    const user = this.create({ username, password: hashedPassword });
+    const salt = await bcrypt.genSalt(); // 使用bcrypt生成盐
+    const hashedPassword = await bcrypt.hash(password, salt); // 使用bcrypt对密码进行哈希处理
 
-    /*
-      尝试将用户保存到数据库中。
-
-      如果保存过程中出现错误，这里通过捕获异常来处理。
-
-      如果错误的代码是 '23505'，
-      这表示唯一约束冲突（比如尝试插入重复的用户名), 
-      则抛出一个 ConflictException 异常，指示用户名已经存在。
-      如果是其他类型的错误，则抛出一个 InternalServerErrorException 异常，表示服务器内部发生了错误。
-
-      这就是这段代码的主要功能和逻辑。
-
-      它负责从传入的认证凭据信息中创建用户，
-      对密码进行哈希处理，
-      并将用户保存到数据库中，
-      同时处理可能发生的错误情况。
-    */
+    const user = this.create({ username, password: hashedPassword }); // 创建用户实体对象，将哈希后的密码存储
 
     try {
-      await this.save(user);
+      await this.save(user); // 尝试保存用户实体到数据库
     } catch (error) {
       if (error.code === '23505') {
-        // duplicate username
-        throw new ConflictException('Username already exists');
+        // 如果捕获到唯一约束错误
+        throw new ConflictException('Username already exists'); // 抛出冲突异常，提示用户名已存在
       } else {
-        throw new InternalServerErrorException();
+        throw new InternalServerErrorException(); // 否则抛出内部服务器错误异常
       }
     }
   }
 }
 
-// 这就是这段代码的主要功能和逻辑。它负责从传入的认证凭据信息中创建用户，对密码进行哈希处理，并将用户保存到数据库中，同时处理可能发生的错误情况。

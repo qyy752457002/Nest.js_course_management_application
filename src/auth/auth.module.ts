@@ -8,52 +8,40 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-// 这段代码是一个 NestJS 模块的定义，主要用于身份验证（Authentication）
-
-// @Module({ ... })：这是一个 NestJS 模块的装饰器，用于定义一个模块
+// AuthModule负责整合认证相关的组件
 @Module({
   imports: [
-    // ConfigModule：配置模块，用于管理应用程序的配置信息
+
+    // 导入配置模块，用于获取JWT密钥等配置信息
     ConfigModule,
-    // PassportModule.register({ defaultStrategy: 'jwt' })：Passport 模块的注册，指定了默认的身份验证策略为 JWT 策略
+
+    // 导入Passport模块，用于实现认证策略
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    // JwtModule.registerAsync({ ... })：异步注册 JWT 模块，这里使用 useFactory 方式根据配置创建 JWT 模块所需的选项
+
+    // 导入JWT模块，用于生成和验证JWT令牌
     JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
+      imports: [ConfigModule], // 引入配置模块
+      inject: [ConfigService], // 注入ConfigService依赖
+      // 异步工厂函数，返回JWT模块的配置对象
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
+        secret: configService.get('JWT_SECRET'), // 获取JWT密钥
         signOptions: {
-          expiresIn: 3600,
+          expiresIn: 3600, // 设置JWT过期时间为3600秒
         },
       }),
     }),
-    // TypeOrmModule.forFeature([UsersRepository])：TypeORM 模块的注册，导入了 UsersRepository 实体以便在该模块中使用数据库操作
+   
+    // 导入TypeORM模块，用于操作数据库
     TypeOrmModule.forFeature([UsersRepository]),
   ],
   
-  /*
-    providers: [...]：这里列出了当前模块所提供的服务（providers）列表：
-
-    - AuthService：身份验证服务，用于处理用户的身份验证逻辑。
-    - JwtStrategy：JWT 策略，用于实现 JWT 的验证逻辑。
-  */
+  // 声明AuthModule的提供者
   providers: [AuthService, JwtStrategy],
 
-  /*
-    controllers: [...]：这里列出了当前模块所包含的控制器（controllers）列表：
-
-    - AuthController：身份验证控制器，包含处理身份验证相关请求的路由处理器。
-  */
+  // 声明AuthModule的控制器
   controllers: [AuthController],
 
-  /*
-    exports: [...]：这里列出了当前模块要导出的提供者（providers）列表，使得其他模块可以使用这些提供者：
-
-    - JwtStrategy：导出了 JWT 策略，以便其他模块可以使用它来保护路由或进行身份验证。
-
-    - PassportModule：导出了 Passport 模块，以便其他模块可以使用 Passport 提供的身份验证功能。
-  */
+  // 将JwtStrategy和PassportModule导出，使其他模块可以访问
   exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}

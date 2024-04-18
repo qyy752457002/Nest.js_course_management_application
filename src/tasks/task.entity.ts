@@ -1,27 +1,24 @@
-import { Exclude } from 'class-transformer';
-import { User } from '../auth/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { TaskStatus } from './task-status.enum';
+import { Exclude } from 'class-transformer'; // 引入 Exclude 装饰器，用于排除属性的转换
+import { User } from '../auth/user.entity'; // 引入用户实体
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'; // 引入 TypeORM 中的装饰器和实体
+import { TaskStatus } from './task-status.enum'; // 引入任务状态枚举
 
-// TypeORM库，它是一个用于在Node.js和TypeScript中操作关系型数据库的ORM（对象关系映射）工具
-@Entity()
+@Entity() // 将此类标记为 TypeORM 实体
 export class Task {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('uuid') // 指定主键为 UUID 类型，并且自动生成
+  id: string; // 任务的唯一标识符
 
-  @Column()
-  title: string;
+  @Column() // 将属性映射到数据库表的列
+  title: string; // 任务标题
 
-  @Column()
-  description: string;
+  @Column() // 将属性映射到数据库表的列
+  description: string; // 任务描述
 
-  @Column()
-  status: TaskStatus;
+  @Column() // 将属性映射到数据库表的列
+  status: TaskStatus; // 任务状态，使用 TaskStatus 枚举类型
 
   /*
-    @ManyToOne((_type) => User, (user) => user.tasks, { eager: false }): 这是一个装饰器，用于指定实体之间的多对一关系。具体来说：
-
-      @ManyToOne: 表示这是一个多对一关系，即多个任务对应一个用户。
+    @ManyToOne: 表示这是一个多对一关系，即多个任务对应一个用户：
 
       (_type) => User: 这是关联实体的类型，指定了多对一关系中的"一"端是什么类型。
       在这里，它指定了关联的实体类型是 User。
@@ -34,7 +31,8 @@ export class Task {
       在这里，eager: false 表示关联的用户不会在加载当前实体时被自动加载，而是按需加载。
   */
 
-  @ManyToOne((_type) => User, (user) => user.tasks, { eager: false })
-  @Exclude({ toPlainOnly: true })
-  user: User;
+  @ManyToOne((_type) => User, (user) => user.tasks, { eager: false }) // 多对一关系装饰器，关联到 User 实体，指定反向关联属性为 user.tasks，并设置按需加载
+  @Exclude({ toPlainOnly: true }) // 使用 Exclude 装饰器排除该属性在转换成普通对象时
+  user: User; // 任务的拥有者，关联到 User 实体
 }
+
