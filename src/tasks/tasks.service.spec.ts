@@ -20,6 +20,7 @@ const mockUser = {
 };
 
 describe('TasksService', () => {
+  // 在测试开始前，创建 TasksService 和 TasksRepository 的实例
   let tasksService: TasksService;
   let tasksRepository;
 
@@ -29,6 +30,10 @@ describe('TasksService', () => {
       // 提供 TasksService 和使用 mockTasksRepository 工厂函数提供的 TasksRepository
       providers: [
         TasksService,
+
+        // 工厂函数mockTasksRepository被用来创建模拟的TasksRepository实例，其中包含了两个模拟方法：getTasks和findOne
+        // 这样，在测试过程中，你可以轻松地模拟这些方法的行为，而不会实际访问数据库
+        // useFactory提供了一种灵活的方式来创建服务或者依赖项的实例，使得你可以根据需要执行自定义的逻辑，比如在测试中使用模拟对象
         { provide: TasksRepository, useFactory: mockTasksRepository },
       ],
     }).compile();
@@ -72,7 +77,6 @@ describe('TasksService', () => {
     it('calls TasksRepository.findOne and handles an error', async () => {
       // 模拟 findOne 方法返回的值为 null，表示未找到任务
       tasksRepository.findOne.mockResolvedValue(null);
-
       // 断言调用 getTaskById 方法会抛出 NotFoundException 异常
       expect(tasksService.getTaskById('someId', mockUser)).rejects.toThrow(
         NotFoundException,
