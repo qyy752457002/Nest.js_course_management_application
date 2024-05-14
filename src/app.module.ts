@@ -9,7 +9,7 @@ import { configValidationSchema } from './config.schema';
   imports: [
     // 导入配置模块并配置环境变量文件路径和验证模式
     ConfigModule.forRoot({
-      envFilePath: [`.env.stage.${process.env.STAGE}`],
+      envFilePath: [`.env.stage.${process.env.STAGE}`], // 指定环境变量文件
       validationSchema: configValidationSchema,
     }),
 

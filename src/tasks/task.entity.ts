@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer'; // 引入 Exclude 装饰器，用于排除属性的转换
+import { Exclude } from 'class-transformer'; // 引入 Exclude 装饰器，用于排除属性的转换，用于序列化（serialization）或反序列化（deserialization）对象时的控制
 import { User } from '../auth/user.entity'; // 引入用户实体
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'; // 引入 TypeORM 中的装饰器和实体
 import { TaskStatus } from './task-status.enum'; // 引入任务状态枚举
@@ -29,6 +29,27 @@ export class Task {
 
       { eager: false }: 这是一个选项，指定了加载策略。
       在这里，eager: false 表示关联的用户不会在加载当前实体时被自动加载，而是按需加载。
+  */
+
+  /*
+    Exclude 装饰器来自于 class-transformer 库，它的作用是用于控制对象的转换行为。
+    
+    在这个特定的代码片段中，Exclude 装饰器被用来排除在将 Task 实例转换为普通对象时，不包含 user 属性。
+
+    在 TypeORM 中，通常我们将实体对象映射到数据库表中，并在需要时进行对象之间的关联查询。
+
+    但是，有时我们需要将实体对象转换为普通对象，比如在将对象传递给 API 响应时。
+
+    在这种情况下，我们可能不希望包含某些属性，比如敏感信息或者不必要的信息。
+
+    这时候就可以使用 Exclude 装饰器。
+
+    在这个例子中，Exclude({ toPlainOnly: true }) 意味着只有在将 Task 对象转换为普通对象时才会排除 user 属性。
+
+    当你从 Nest.js 的 REST API 返回响应给客户端时，user 属性不会包含在响应的数据中。
+
+    这样做的目的可能是为了在 API 响应中隐藏用户信息，
+    只返回任务的基本信息而不包含用户信息，以增强安全性或者减少数据传输量。
   */
 
   @ManyToOne((_type) => User, (user) => user.tasks, { eager: false }) // 多对一关系装饰器，关联到 User 实体，指定反向关联属性为 user.tasks，并设置按需加载
